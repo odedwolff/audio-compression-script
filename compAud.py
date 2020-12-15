@@ -15,7 +15,7 @@ def compDir(outputRoot, pathFromInputRoot):
 	
 	for entry in os.scandir( pathFromInputRoot):
 		if entry.is_file() and entry.path.endswith(".wav"):
-			AudioSegment.from_wav(entry.path).export(outputFolder + pathFromInputRoot + entry.path[:-4] + ".mp3", format="mp3")
+			AudioSegment.from_wav(entry.path).export(outputFolder + entry.path[:-4] + ".mp3", format="mp3")
 		else:
 			if entry.is_dir() and entry.path != outputFolder:
 				newFolderPath = outputRoot + entry.path
