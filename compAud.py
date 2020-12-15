@@ -33,11 +33,23 @@ def convertTreeToMp3():
 
 
 def convertFile(srcFilePath, outputFolderRoot):
+	"""
 	fileExt=srcFilePath[-3:]
 	if not fileExt in supported_files:
 		print("file format " + fileExt + " not supported")
 		return None 
 	prefix=srcFilePath.replace(" ", "_")[0:-4]
+	print("prefix =" + prefix)
+	buf = AudioSegment.from_file(srcFilePath, fileExt)
+	buf.export(outputFolder + prefix + ".mp3", format="mp3");
+	
+	"""
+	dotRIndex = srcFilePath.rfind(".")
+	fileExt=srcFilePath[dotRIndex + 1:]
+	if not fileExt in supported_files:
+		print("file format " + fileExt + " not supported")
+		return None 
+	prefix=srcFilePath.replace(" ", "_")[0:dotRIndex]
 	print("prefix =" + prefix)
 	buf = AudioSegment.from_file(srcFilePath, fileExt)
 	buf.export(outputFolder + prefix + ".mp3", format="mp3");
