@@ -65,7 +65,7 @@ def convertFile(srcFilePath, outputFolderRoot):
 	print("bit rate=" + mediainfo(srcFilePath)['bit_rate'])
 	print("size=" + mediainfo(srcFilePath)['size'])
 	#ffmpeg -i wma_src.wma -b 12k  output.mp3
-	sysCommand = "ffmpeg -i " +srcFilePath + " -b " + outBitRate + " " + outputFolder + prefix[1:] + ".mp3"
+	sysCommand = "ffmpeg -i \"" +srcFilePath + "\" -b " + outBitRate + " " + outputFolder + prefix[1:] + ".mp3"
 	print ("sysCommand=" + sysCommand)
 	os.system(sysCommand )
 	
