@@ -9,8 +9,12 @@ outBitRate = "12k"
 supported_files = ["wav", "wma", "ogg", "flac"]
 
 #files that are either smaller or have already low bitrate are copied to eh destination folder as they, with no compression
-min_size_byte = 100000
-min_BitRate = 20000
+# min_size_byte = 100000
+# min_BitRate = 20000
+
+min_size_byte = 10
+min_BitRate = 20
+
 
 
 
@@ -19,6 +23,7 @@ min_BitRate = 20000
 #    depth) the folders sub tree will copied, rooted udner the traget folder. each folder in the target tree will contain output files for files 
 #	 in coresponding input foldeer 
 #
+
 
 def compDir(outputRoot, pathFromInputRoot):
 	for entry in os.scandir( pathFromInputRoot):
@@ -38,21 +43,8 @@ def convertTreeToMp3():
 			os.makedirs(outputFolder)
 	compDir(outputFolder, "./")
 		
-#convertAllWavToMp3s(.)
-
 
 def convertFile(srcFilePath, outputFolderRoot):
-	"""
-	fileExt=srcFilePath[-3:]
-	if not fileExt in supported_files:
-		print("file format " + fileExt + " not supported")
-		return None 
-	prefix=srcFilePath.replace(" ", "_")[0:-4]
-	print("prefix =" + prefix)
-	buf = AudioSegment.from_file(srcFilePath, fileExt)
-	buf.export(outputFolder + prefix + ".mp3", format="mp3");
-	
-	"""
 	dotRIndex = srcFilePath.rfind(".")
 	fileExt=srcFilePath[dotRIndex + 1:]
 	if not fileExt in supported_files:
@@ -60,20 +52,34 @@ def convertFile(srcFilePath, outputFolderRoot):
 		return None 
 	print("converting file " + srcFilePath )
 	prefix=srcFilePath.replace(" ", "_")[0:dotRIndex]
-	print("prefix =" + prefix)
-	print("fileExt =" + fileExt)
-	print("bit rate=" + mediainfo(srcFilePath)['bit_rate'])
-	print("size=" + mediainfo(srcFilePath)['size'])
-	#ffmpeg -i wma_src.wma -b 12k  output.mp3
-	sysCommand = "ffmpeg -i \"" +srcFilePath + "\" -b " + outBitRate + " " + outputFolder + prefix[1:] + ".mp3"
+	fSize = mediainfo(srcFilePath)['size']
+	fBRrate = mediainfo(srcFilePath)['bit_rate']
+	print('---> prefix:%s, fileExt:%s, bit rate:%s, size:%s' % (prefix,fileExt,fBRrate,fSize))
+	sysCommand = None
+	
+	if float(fSize) < min_size_byte or float(fBRrate) < min_BitRate:
+		print('file is size or bit rate is bellow threshold, copying to destination folder as is')
+		srcFilePath = pathFromRunDir(srcFilePath)
+		sysCommand = ('copy %s %s' % (srcFilePath, outputFolder + srcFilePath))
+	else:
+		#ffmpeg -i wma_src.wma -b 12k  output.mp3
+		sysCommand = "ffmpeg -i \"" +srcFilePath + "\" -b " + outBitRate + " " + outputFolder + prefix[1:] + ".mp3"
 	print ("sysCommand=" + sysCommand)
 	os.system(sysCommand )
-	
+
+def pathFromRunDir(path):
+ #strips from the path  ...\folder\sub_fdler\file.ext the file.ext partition
+	if not path:
+		print ('invalid path %s' % (path))
+	idx = path.rfind("\\")
+	if idx < 1 :
+		return ""
+	out = path[0:idx]
+	print('stripped path: %s' % (out))
+	return out
 	
 def testConvertTםWma():
-	#buf = AudioSegment.from_file("wma_src.wma", "wma")
-	#buf = AudioSegment.from_file("wav_src.wav", "wav")
-	#ffmpeg -i audio.ogg -acodec libmp3lame audio.mp3
+	
 	print(mediainfo("wav_src.wav")['size'])
 	
 convertTreeToMp3()
