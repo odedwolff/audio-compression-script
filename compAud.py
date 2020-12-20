@@ -12,8 +12,8 @@ supported_files = ["wav", "wma", "ogg", "flac"]
 # min_size_byte = 100000
 # min_BitRate = 20000
 
-min_size_byte = 10
-min_BitRate = 20
+min_size_byte = 4
+min_BitRate = 2
 
 
 
@@ -50,7 +50,7 @@ def convertFile(srcFilePath, outputFolderRoot):
 	if not fileExt in supported_files:
 		print("file format " + fileExt + " not supported")
 		return None 
-	print("converting file " + srcFilePath )
+	print("handling file " + srcFilePath )
 	prefix=srcFilePath.replace(" ", "_")[0:dotRIndex]
 	fSize = mediainfo(srcFilePath)['size']
 	fBRrate = mediainfo(srcFilePath)['bit_rate']
@@ -59,11 +59,11 @@ def convertFile(srcFilePath, outputFolderRoot):
 	
 	if float(fSize) < min_size_byte or float(fBRrate) < min_BitRate:
 		print('file is size or bit rate is bellow threshold, copying to destination folder as is')
-		srcFilePath = pathFromRunDir(srcFilePath)
-		sysCommand = ('copy %s %s' % (srcFilePath, outputFolder + srcFilePath))
+		relPath = pathFromRunDir(srcFilePath)
+		sysCommand = ('copy \"%s\" \"%s\" ' % (srcFilePath, outputFolder + relPath))
 	else:
 		#ffmpeg -i wma_src.wma -b 12k  output.mp3
-		sysCommand = "ffmpeg -i \"" +srcFilePath + "\" -b " + outBitRate + " " + outputFolder + prefix[1:] + ".mp3"
+		sysCommand = "ffmpeg -i \"" +srcFilePath + "\" -b:a " + outBitRate + " " + outputFolder + prefix[1:] + ".mp3"
 	print ("sysCommand=" + sysCommand)
 	os.system(sysCommand )
 
