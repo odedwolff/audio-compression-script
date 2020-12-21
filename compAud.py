@@ -11,11 +11,16 @@ outBitRate = "12k"
 supported_files = ["wav", "wma", "ogg", "flac"]
 
 #files that are either smaller or have already low bitrate are copied to eh destination folder as they, with no compression
-# min_size_byte = 100000
+# min_size_KB = 100000
 # min_BitRate = 20000
 
-min_size_byte = 4
-min_BitRate = 2
+
+K = 1024 
+M = K**2
+
+min_size_MB = 4 
+#kiilo bit per second (bit, not byte!) 
+min_BitRate = 20 * K
 
 
 
@@ -68,8 +73,9 @@ def convertFile(srcFilePath, outputFolderRoot):
 	print('---> prefix:%s, fileExt:%s, bit rate:%s, size:%s' % (prefix,fileExt,fBRrate,fSize))
 	sysCommand = None
 	
-	if float(fSize) < min_size_byte or float(fBRrate) < min_BitRate:
-		print('file size:%f TH SIZE %f file bRate%f TH BRATE%f' % (float(fSize), min_size_byte, float(fBRrate), min_BitRate))
+	
+	print('file size MB:%1.2f M TH SIZE %1.2f M -- -file bRate:%1.2f TH BRATE:%1.2f' % ((float(fSize))/M , min_size_MB, (float(fBRrate))/K, min_BitRate/K))
+	if (float(fSize))/M < min_size_MB or float(fBRrate) < min_BitRate:
 		print('file is size or bit rate is bellow threshold, copying to destination folder as is')
 		relPath = pathFromRunDir(srcFilePath)
 		sysCommand = ('copy \"%s\" \"%s\" ' % (srcFilePath, outputFolder + relPath))
