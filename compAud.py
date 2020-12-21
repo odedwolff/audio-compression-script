@@ -1,6 +1,8 @@
 from pydub import AudioSegment
 from pydub.utils import mediainfo
 import os
+import time 
+import datetime
 
 outputFolder = "./output";
 outBitRate = "12k"
@@ -14,6 +16,7 @@ supported_files = ["wav", "wma", "ogg", "flac"]
 
 min_size_byte = 4
 min_BitRate = 2
+
 
 
 
@@ -39,9 +42,17 @@ def compDir(outputRoot, pathFromInputRoot):
 
 
 def convertTreeToMp3():
+	startTime = time.time()
+	t = time.localtime()
+	current_time = time.strftime("start script %H:%M:%S", t)
+	print(current_time)
+	
 	if not os.path.exists(outputFolder):
 			os.makedirs(outputFolder)
 	compDir(outputFolder, "./")
+	
+	runTimeSec =  time.time() - startTime
+	print('COMPLETE, run time %s' % (datetime.timedelta(seconds=runTimeSec)))
 		
 
 def convertFile(srcFilePath, outputFolderRoot):
@@ -58,6 +69,7 @@ def convertFile(srcFilePath, outputFolderRoot):
 	sysCommand = None
 	
 	if float(fSize) < min_size_byte or float(fBRrate) < min_BitRate:
+		print('file size:%f TH SIZE %f file bRate%f TH BRATE%f' % (float(fSize), min_size_byte, float(fBRrate), min_BitRate))
 		print('file is size or bit rate is bellow threshold, copying to destination folder as is')
 		relPath = pathFromRunDir(srcFilePath)
 		sysCommand = ('copy \"%s\" \"%s\" ' % (srcFilePath, outputFolder + relPath))
