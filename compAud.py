@@ -14,7 +14,7 @@ supported_files = ["wav", "wma", "ogg", "flac"]
 # min_size_byte = 100000
 # min_BitRate = 20000
 
-min_size_byte = 4
+min_size_byte = 4000000
 min_BitRate = 2
 
 
@@ -73,9 +73,10 @@ def convertFile(srcFilePath, outputFolderRoot):
 		print('file is size or bit rate is bellow threshold, copying to destination folder as is')
 		relPath = pathFromRunDir(srcFilePath)
 		sysCommand = ('copy \"%s\" \"%s\" ' % (srcFilePath, outputFolder + relPath))
+		
 	else:
 		#ffmpeg -i wma_src.wma -b 12k  output.mp3
-		sysCommand = "ffmpeg -i \"" +srcFilePath + "\" -b:a " + outBitRate + " " + outputFolder + prefix[1:] + ".mp3"
+		sysCommand = ('ffmpeg -i "%s" -b:a %s %s' % (srcFilePath, outBitRate, outputFolder + prefix[1:] + ".mp3"))
 	print ("sysCommand=" + sysCommand)
 	os.system(sysCommand )
 
