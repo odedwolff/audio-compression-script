@@ -14,7 +14,7 @@ supported_files = ["wav", "wma", "ogg", "flac"]
 # min_size_byte = 100000
 # min_BitRate = 20000
 
-min_size_byte = 4000000
+min_size_byte = 4
 min_BitRate = 2
 
 
@@ -76,7 +76,7 @@ def convertFile(srcFilePath, outputFolderRoot):
 		
 	else:
 		#ffmpeg -i wma_src.wma -b 12k  output.mp3
-		sysCommand = ('ffmpeg -i "%s" -b:a %s %s' % (srcFilePath, outBitRate, outputFolder + prefix[1:] + ".mp3"))
+		sysCommand = ('ffmpeg -i "%s" -loglevel %s -b:a %s %s' % (srcFilePath, "warning", outBitRate, outputFolder + prefix[1:] + ".mp3"))
 	print ("sysCommand=" + sysCommand)
 	os.system(sysCommand )
 
