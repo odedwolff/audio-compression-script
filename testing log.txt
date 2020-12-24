@@ -1,0 +1,24 @@
+22-Dec-2020 
++compression of of different file fomats to mp3: wav, ogg, flac, wma: v
++copying of file as is to target if either file size or bit rate are bellow threshold 
+	+ all file bellow size threshold, copy as is: v 	
+	+ all files bellow bit rate threshold, copy as is: 
+
+
+24-Dec-2020 
+	+ all files above both thresholds (compress all): v
+	+ all files above size TH but bellow bitrate TH (copy all as is): v
+	+ all files bellow size TH but above bitrate TH (copy all as is): v
+	+ differntiate by file size (copy as is bellow TH, compress above): v
+	+ differntiate by bitrate (copy as is bellow TH, compress above): 
+
+size by       test 
+win exlorer   pass 
+-------------------	
+wma: 128      v	 
+flac: 700     v
+ogg: 1400     x read as 245 from file meta-> cp as is 
+wav: 2000     v
+
+	summary: went ok aside from the OGG, which seem to have a different file size than its meta data 
+

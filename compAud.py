@@ -10,17 +10,15 @@ outBitRate = "12k"
 
 supported_files = ["wav", "wma", "ogg", "flac"]
 
-#files that are either smaller or have already low bitrate are copied to eh destination folder as they, with no compression
-# min_size_KB = 100000
-# min_BitRate = 20000
-
 
 K = 1024 
 M = K**2
 
-min_size_MB = 4 
+#files that are either smaller or have already low bitrate are copied to the detination folder as is (are), with no compression
+
+min_size_MB = 0.5
 #kiilo bit per second (bit, not byte!) 
-min_BitRate = 20 * K
+min_BitRate = 1000 * K
 
 
 
@@ -66,8 +64,9 @@ def convertFile(srcFilePath, outputFolderRoot):
 	if not fileExt in supported_files:
 		print("file format " + fileExt + " not supported")
 		return None 
-	print("handling file " + srcFilePath )
+	print("\n handling file " + srcFilePath )
 	prefix=srcFilePath.replace(" ", "_")[0:dotRIndex]
+	
 	fSize = mediainfo(srcFilePath)['size']
 	fBRrate = mediainfo(srcFilePath)['bit_rate']
 	print('---> prefix:%s, fileExt:%s, bit rate:%s, size:%s' % (prefix,fileExt,fBRrate,fSize))
