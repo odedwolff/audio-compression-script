@@ -18,9 +18,14 @@ M = K**2
 
 min_size_MB = 0.5
 #kiilo bit per second (bit, not byte!) 
-min_BitRate = 1000 * K
+min_BitRate = 20 * K
 
 
+
+#unspported files statistics by extention 
+usFiilesByExt = {}
+#true for copying unspported files to target as is, false skip 
+cfg_copyUnspported = True
 
 
 
@@ -56,15 +61,23 @@ def convertTreeToMp3():
 	
 	runTimeSec =  time.time() - startTime
 	print('COMPLETE, run time %s' % (datetime.timedelta(seconds=runTimeSec)))
+	print('unsupported files stat: \n ')
 		
 
 def convertFile(srcFilePath, outputFolderRoot):
+	isSupported = True
 	dotRIndex = srcFilePath.rfind(".")
 	fileExt=srcFilePath[dotRIndex + 1:]
-	if not fileExt in supported_files:
-		print("file format " + fileExt + " not supported")
-		return None 
 	print("\n handling file " + srcFilePath )
+	if not fileExt in supported_files:
+		addExtToUnsupStat(fileExt)
+		print("file format " + fileExt + " not supported")
+		if cfg_copyUnspported:
+			isSupported=False
+			print("fopying file to target unprocessed")
+		else
+			print("dropping file")
+			return None
 	prefix=srcFilePath.replace(" ", "_")[0:dotRIndex]
 	
 	fSize = mediainfo(srcFilePath)['size']
@@ -74,11 +87,12 @@ def convertFile(srcFilePath, outputFolderRoot):
 	
 	
 	print('file size MB:%1.2f M TH SIZE %1.2f M -- -file bRate:%1.2f TH BRATE:%1.2f' % ((float(fSize))/M , min_size_MB, (float(fBRrate))/K, min_BitRate/K))
-	if (float(fSize))/M < min_size_MB or float(fBRrate) < min_BitRate:
+	#file not supported or bellow Thresholds -> copy as is to target
+	if (not isSupported ) or ((float(fSize))/M < min_size_MB or float(fBRrate) < min_BitRate ):
 		print('file is size or bit rate is bellow threshold, copying to destination folder as is')
 		relPath = pathFromRunDir(srcFilePath)
 		sysCommand = ('copy \"%s\" \"%s\" ' % (srcFilePath, outputFolder + relPath))
-		
+	#compress 	
 	else:
 		#ffmpeg -i wma_src.wma -b 12k  output.mp3
 		sysCommand = ('ffmpeg -i "%s" -loglevel %s -b:a %s %s' % (srcFilePath, "warning", outBitRate, outputFolder + prefix[1:] + ".mp3"))
@@ -99,6 +113,12 @@ def pathFromRunDir(path):
 def testConvertTםWma():
 	
 	print(mediainfo("wav_src.wav")['size'])
+
+def addExtToUnsupStat(fileExt):
+	if fileExt in usFiilesByExt.keys():
+		usFiilesByExt[fileExt] += 1
+	else:
+		usFiilesByExt[fileExt] = 1
 	
 convertTreeToMp3()
 # testConvertTםWma()

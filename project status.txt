@@ -1,0 +1,2 @@
+25-dec-2020 added more stat registring of unsupported files, and implemented an option to copy unsupported files as-is to target
+not yet tested at any capacity! 
