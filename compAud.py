@@ -4,8 +4,8 @@ import os
 import time 
 import datetime
 
-outputFolder = "./output";
-outBitRate = "12k"
+#outputFolder = "./output";
+#outBitRate = "12k"
 
 
 supported_files = ["wav", "wma", "ogg", "flac"]
@@ -36,35 +36,47 @@ cfg_copyUnspported = True
 #
 
 
-def compDir(outputRoot, pathFromInputRoot):
-	for entry in os.scandir( pathFromInputRoot):
+
+#at entering this function, both input and out put folder are assumed to exist, thus, if there are sub directories at the input tree, we first create the corresponding 
+#output folder and only then call in recursion 
+def compDir(inputRoot, outputRoot, relPath, targetBitRate):
+	currentInputFolder = inputRoot + relPath
+	currentOutputFolder = outputRoot + relPath
+	#print("entering compDir(curInputFolder=%s, outputRoot=%s, targetBitRate=%s)" % (curInputFolder, outputRoot, targetBitRate))
+	for entry in os.scandir(currentInputFolder):
 		if entry.is_file():
-			convertFile(entry.path, outputFolder)
-					
+			convertFile(entry.path, outputRoot, relPath, targetBitRate)
 		else:
-			if entry.is_dir() and entry.path != outputFolder:
-				newFolderPath = outputRoot + entry.path
-				os.makedirs(newFolderPath)
-				compDir(outputRoot, entry.path)
+			if entry.is_dir():
+				#if not os.path.exists(entry.path):
+				os.makedirs(outputRoot + //****compute new rlative ***//)
+				compDir(/**recursion args ***/)
 
 
 
-def convertTreeToMp3():
+def convertTreeToMp3(inputFolderRoot, outputFolder, targetBitRate):
+	
+	print("entering convertTreeToMp3()")
+	print(("args=(%s, %s, %s)" % (inputFolderRoot, outputFolder, targetBitRate)))
+	outBitRate = str(targetBitRate) + "k"
 	startTime = time.time()
 	t = time.localtime()
 	current_time = time.strftime("start script %H:%M:%S", t)
 	print(current_time)
 	
 	if not os.path.exists(outputFolder):
-			os.makedirs(outputFolder)
-	compDir(outputFolder, "./")
-	
+			#os.makedirs(outputFolder)
+			print(("output folder %s doe not exist, ABORTING" % (outputFolder)))
+			return 
+	#compDir(inputFolder, outputFolder, "./")
+	compDir(inputFolderRoot, outputFolder, targetBitRate)
+
 	runTimeSec =  time.time() - startTime
 	print('COMPLETE, run time %s' % (datetime.timedelta(seconds=runTimeSec)))
 	print('unsupported files stat: \n ')
 		
 
-def convertFile(srcFilePath, outputFolderRoot):
+def convertFile(srcFilePath, outputFolderRoot, targetBitRate):
 	isSupported = True
 	dotRIndex = srcFilePath.rfind(".")
 	fileExt=srcFilePath[dotRIndex + 1:]
@@ -75,7 +87,7 @@ def convertFile(srcFilePath, outputFolderRoot):
 		if cfg_copyUnspported:
 			isSupported=False
 			print("fopying file to target unprocessed")
-		else
+		else:
 			print("dropping file")
 			return None
 	prefix=srcFilePath.replace(" ", "_")[0:dotRIndex]
@@ -90,16 +102,22 @@ def convertFile(srcFilePath, outputFolderRoot):
 	#file not supported or bellow Thresholds -> copy as is to target
 	if (not isSupported ) or ((float(fSize))/M < min_size_MB or float(fBRrate) < min_BitRate ):
 		print('file is size or bit rate is bellow threshold, copying to destination folder as is')
-		relPath = pathFromRunDir(srcFilePath)
-		sysCommand = ('copy \"%s\" \"%s\" ' % (srcFilePath, outputFolder + relPath))
+		relPath = pathFromRunDir(srcFilePath, outputFolderRoot)
+		sysCommand = ('copy \"%s\" \"%s\" ' % (reverseSlashDirection(srcFilePath), reverseSlashDirection(outputFolderRoot + relPath)))
 	#compress 	
 	else:
 		#ffmpeg -i wma_src.wma -b 12k  output.mp3
-		sysCommand = ('ffmpeg -i "%s" -loglevel %s -b:a %s %s' % (srcFilePath, "warning", outBitRate, outputFolder + prefix[1:] + ".mp3"))
+		sysCommand = ('ffmpeg -i "%s" -loglevel %s  -b:a %sk "%s"' %
+		(reverseSlashDirection(srcFilePath), "warning", targetBitRate, reverseSlashDirection(outputFolderRoot + prefix[1:] + ".mp3")))
 	print ("sysCommand=" + sysCommand)
 	os.system(sysCommand )
 
-def pathFromRunDir(path):
+def pathFromRunDir(srcFilePath, outputFolderRoot):
+	print(("enterint pathFromRunDir(srcFilePath=%s, outputFolderRoot=%s)" % (srcFilePath, outputFolderRoot)))
+	return "dummy\\path"
+
+
+def pathFromRunDir2(path):
  #strips from the path  ...\folder\sub_fdler\file.ext the file.ext partition
 	if not path:
 		print ('invalid path %s' % (path))
@@ -109,9 +127,11 @@ def pathFromRunDir(path):
 	out = path[0:idx]
 	print('stripped path: %s' % (out))
 	return out
+
+
+
 	
 def testConvertTםWma():
-	
 	print(mediainfo("wav_src.wav")['size'])
 
 def addExtToUnsupStat(fileExt):
@@ -119,6 +139,10 @@ def addExtToUnsupStat(fileExt):
 		usFiilesByExt[fileExt] += 1
 	else:
 		usFiilesByExt[fileExt] = 1
+		
+def reverseSlashDirection(path):
+	 return path.replace("/", '\\')
+
+
 	
-convertTreeToMp3()
-# testConvertTםWma()
+#convertTreeToMp3()
