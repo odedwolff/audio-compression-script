@@ -40,17 +40,20 @@ cfg_copyUnspported = True
 #at entering this function, both input and out put folder are assumed to exist, thus, if there are sub directories at the input tree, we first create the corresponding 
 #output folder and only then call in recursion 
 def compDir(inputRoot, outputRoot, relPath, targetBitRate):
+	print("entering compDir(inputRoot=%s, outputRoot=%s, relPath=%s, targetBitRate=%s)" % (inputRoot, outputRoot, relPath, targetBitRate))
 	currentInputFolder = inputRoot + relPath
 	currentOutputFolder = outputRoot + relPath
-	#print("entering compDir(curInputFolder=%s, outputRoot=%s, targetBitRate=%s)" % (curInputFolder, outputRoot, targetBitRate))
+	fullCurrentPath = inputRoot + relPath;
 	for entry in os.scandir(currentInputFolder):
 		if entry.is_file():
-			convertFile(entry.path, outputRoot, relPath, targetBitRate)
+			convertFile(entry.path, outputRoot + relPath, targetBitRate)
 		else:
 			if entry.is_dir():
-				#if not os.path.exists(entry.path):
-				os.makedirs(outputRoot + //****compute new rlative ***//)
-				compDir(/**recursion args ***/)
+				#newRelPath = entry.path[len(fullCurrentPath):]
+				newRelPath = entry.path[len(inputRoot) + 0:]
+				newOutputFull = outputRoot + newRelPath
+				os.makedirs(newOutputFull)
+				compDir(inputRoot, outputRoot, newRelPath, targetBitRate)
 
 
 
@@ -69,14 +72,14 @@ def convertTreeToMp3(inputFolderRoot, outputFolder, targetBitRate):
 			print(("output folder %s doe not exist, ABORTING" % (outputFolder)))
 			return 
 	#compDir(inputFolder, outputFolder, "./")
-	compDir(inputFolderRoot, outputFolder, targetBitRate)
+	compDir(inputFolderRoot, outputFolder,"",targetBitRate)
 
 	runTimeSec =  time.time() - startTime
 	print('COMPLETE, run time %s' % (datetime.timedelta(seconds=runTimeSec)))
 	print('unsupported files stat: \n ')
 		
 
-def convertFile(srcFilePath, outputFolderRoot, targetBitRate):
+def convertFile(srcFilePath, targetFolder, targetBitRate):
 	isSupported = True
 	dotRIndex = srcFilePath.rfind(".")
 	fileExt=srcFilePath[dotRIndex + 1:]
@@ -102,13 +105,15 @@ def convertFile(srcFilePath, outputFolderRoot, targetBitRate):
 	#file not supported or bellow Thresholds -> copy as is to target
 	if (not isSupported ) or ((float(fSize))/M < min_size_MB or float(fBRrate) < min_BitRate ):
 		print('file is size or bit rate is bellow threshold, copying to destination folder as is')
-		relPath = pathFromRunDir(srcFilePath, outputFolderRoot)
-		sysCommand = ('copy \"%s\" \"%s\" ' % (reverseSlashDirection(srcFilePath), reverseSlashDirection(outputFolderRoot + relPath)))
+		sysCommand = ('copy \"%s\" \"%s\" ' % (reverseSlashDirection(srcFilePath), reverseSlashDirection(targetFolder)))
 	#compress 	
 	else:
 		#ffmpeg -i wma_src.wma -b 12k  output.mp3
+		#trim the file name from tha path
+		fileName = srcFilePath[srcFilePath.rfind("\\"):]
+		print("claculated file name %s" % (fileName))
 		sysCommand = ('ffmpeg -i "%s" -loglevel %s  -b:a %sk "%s"' %
-		(reverseSlashDirection(srcFilePath), "warning", targetBitRate, reverseSlashDirection(outputFolderRoot + prefix[1:] + ".mp3")))
+		(reverseSlashDirection(srcFilePath), "warning", targetBitRate, reverseSlashDirection(targetFolder + fileName + ".mp3")))
 	print ("sysCommand=" + sysCommand)
 	os.system(sysCommand )
 
