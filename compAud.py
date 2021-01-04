@@ -8,7 +8,7 @@ import datetime
 #outBitRate = "12k"
 
 
-supported_files = ["wav", "wma", "ogg", "flac"]
+supported_files = ["wav", "wma", "ogg", "flac", "m4a"]
 
 
 K = 1024 
