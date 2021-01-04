@@ -77,6 +77,7 @@ def convertTreeToMp3(inputFolderRoot, outputFolder, targetBitRate):
 	runTimeSec =  time.time() - startTime
 	print('COMPLETE, run time %s' % (datetime.timedelta(seconds=runTimeSec)))
 	print('unsupported files stat: \n ')
+	print(usFiilesByExt)
 		
 
 def convertFile(srcFilePath, targetFolder, targetBitRate):
@@ -140,6 +141,7 @@ def testConvertTםWma():
 	print(mediainfo("wav_src.wav")['size'])
 
 def addExtToUnsupStat(fileExt):
+	print('entering addExtToUnsupStat(fileExt=%s)' % (fileExt))
 	if fileExt in usFiilesByExt.keys():
 		usFiilesByExt[fileExt] += 1
 	else:

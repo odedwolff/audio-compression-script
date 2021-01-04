@@ -20,5 +20,10 @@ flac: 700     v
 ogg: 1400     x read as 245 from file meta-> cp as is 
 wav: 2000     v
 
-	summary: went ok aside from the OGG, which seem to have a different file size than its meta data 
+	summary: went ok aside from the OGG, which seem to have a different file size than its meta data +++
+	
+	
+04-Jan-21
+	handling files containing spaces in their names. results: all well 
+	
 
