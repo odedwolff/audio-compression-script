@@ -16,7 +16,7 @@ M = K**2
 
 #files that are either smaller or have already low bitrate are copied to the detination folder as is (are), with no compression
 
-min_size_MB = 0.5
+min_size_MB = 0.2
 #kiilo bit per second (bit, not byte!) 
 min_BitRate = 20 * K
 
@@ -24,6 +24,17 @@ min_BitRate = 20 * K
 
 #unspported files statistics by extention 
 usFiilesByExt = {}
+#stat of files copied unprocessed becaue they were bellow a threshold
+statUnderThrsh = {
+	'size':0,
+	'bitRate':0
+}
+filesListsUThrsh = {
+	'size':[],
+	'bitRate':[]
+}
+
+
 #true for copying unspported files to target as is, false skip 
 cfg_copyUnspported = True
 
@@ -75,9 +86,21 @@ def convertTreeToMp3(inputFolderRoot, outputFolder, targetBitRate):
 	compDir(inputFolderRoot, outputFolder,"",targetBitRate)
 
 	runTimeSec =  time.time() - startTime
-	print('COMPLETE, run time %s' % (datetime.timedelta(seconds=runTimeSec)))
-	print('unsupported files stat: \n ')
+	printStats(runTimeSec)
+
+
+def printStats(runTimeSec):	
+	print('--------COMPLETE, run time %s -----------------' % (datetime.timedelta(seconds=runTimeSec)))
+	print('unsupported files stat:')
 	print(usFiilesByExt)
+	print('stats of files bellow thresholds:')
+	print(statUnderThrsh)
+	print('>>>>>>>>>files bellow size threshold (copied unprocessed):  <<<<<<<<')
+	for file in filesListsUThrsh['size']:
+		print (file)
+	print('<<<<<<<<files bellow bitRate threshold (copied unprocessed):   >>>>>>>>>')
+	for file in filesListsUThrsh['bitRate']:
+		print (file)
 		
 
 def convertFile(srcFilePath, targetFolder, targetBitRate):
@@ -104,9 +127,18 @@ def convertFile(srcFilePath, targetFolder, targetBitRate):
 	
 	print('file size MB:%1.2f M TH SIZE %1.2f M -- -file bRate:%1.2f TH BRATE:%1.2f' % ((float(fSize))/M , min_size_MB, (float(fBRrate))/K, min_BitRate/K))
 	#file not supported or bellow Thresholds -> copy as is to target
-	if (not isSupported ) or ((float(fSize))/M < min_size_MB or float(fBRrate) < min_BitRate ):
+	underBRate = float(fBRrate) < min_BitRate
+	underSize =  (float(fSize))/M < min_size_MB
+	if (not isSupported ) or underBRate or  underSize:
 		print('file is size or bit rate is bellow threshold, copying to destination folder as is')
 		sysCommand = ('copy \"%s\" \"%s\" ' % (reverseSlashDirection(srcFilePath), reverseSlashDirection(targetFolder)))
+		if isSupported:
+			if underBRate:
+				statUnderThrsh['bitRate'] += 1
+				filesListsUThrsh['bitRate'].append(srcFilePath)
+			if underSize:
+				statUnderThrsh['size'] += 1
+				filesListsUThrsh['size'].append(srcFilePath)
 	#compress 	
 	else:
 		#ffmpeg -i wma_src.wma -b 12k  output.mp3
