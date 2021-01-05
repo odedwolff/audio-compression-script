@@ -119,18 +119,27 @@ def convertFile(srcFilePath, targetFolder, targetBitRate):
 			return None
 	prefix=srcFilePath.replace(" ", "_")[0:dotRIndex]
 	
-	fSize = mediainfo(srcFilePath)['size']
-	fBRrate = mediainfo(srcFilePath)['bit_rate']
+	
+	#if size or bit Rate are not in file meta deta, mark corresponding values in -1
+	if 'size' in mediainfo(srcFilePath):
+		fSize = mediainfo(srcFilePath)['size']
+	else:
+		fSize = -1
+	if 'bit_rate' in mediainfo(srcFilePath):
+		fBRrate = mediainfo(srcFilePath)['bit_rate']
+	else:
+		fBRrate = -1
+		
 	print('---> prefix:%s, fileExt:%s, bit rate:%s, size:%s' % (prefix,fileExt,fBRrate,fSize))
 	sysCommand = None
 	
 	
 	print('file size MB:%1.2f M TH SIZE %1.2f M -- -file bRate:%1.2f TH BRATE:%1.2f' % ((float(fSize))/M , min_size_MB, (float(fBRrate))/K, min_BitRate/K))
 	#file not supported or bellow Thresholds -> copy as is to target
-	underBRate = float(fBRrate) < min_BitRate
-	underSize =  (float(fSize))/M < min_size_MB
+	underBRate = float(fBRrate) < min_BitRate and float(fBRrate) > 0 
+	underSize =  (float(fSize))/M < min_size_MB and float(fSize) > 0
 	if (not isSupported ) or underBRate or  underSize:
-		print('file is size or bit rate is bellow threshold, copying to destination folder as is')
+		print('file is not supported or size or bit rate is bellow threshold, copying to destination folder as is')
 		sysCommand = ('copy \"%s\" \"%s\" ' % (reverseSlashDirection(srcFilePath), reverseSlashDirection(targetFolder)))
 		if isSupported:
 			if underBRate:
