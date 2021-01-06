@@ -120,7 +120,7 @@ def convertFile(srcFilePath, targetFolder, targetBitRate):
 	prefix=srcFilePath.replace(" ", "_")[0:dotRIndex]
 	
 	
-	#if size or bit Rate are not in file meta deta, mark corresponding values in -1
+	#read bit rate and size from file meta data
 	if 'size' in mediainfo(srcFilePath):
 		fSize = mediainfo(srcFilePath)['size']
 	else:
